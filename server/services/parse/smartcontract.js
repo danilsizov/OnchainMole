@@ -3,22 +3,28 @@ const axios = require('axios')
 
 let api
 
+const get_transactions = async (contract) => {
+    const transactions = await scan('bsc', contract)
+
+    return transactions
+}
+
 const scan = async (chain, address) => {
-    const offset = 10000;
-    let startblock = 0;
 
     if(chain == 'bsc'){
         api = process.env.BSCSCAN_API
-        const url = `https://api.bscscan.com/api?module=account&action=tokentx&contractaddress=${address}&startblock=${startblock}&endblock=99999999&offset=${offset}&sort=asc&apikey=${api}`
-        return await get_history(address, bsc, url)
+        const url = `https://api.bscscan.com/api?module=account&action=tokentx`
+        return await get_history(address, api, url)
     }
 }
 
 const get_history = async (address, api, url) => {
     let transactions = [];
+    const offset = 10000;
+    let startblock = 0;
 
     while (true) {
-        let res = await axios.get(url);
+        let res = await axios.get(url + `&contractaddress=${address}&startblock=${startblock}&endblock=99999999&offset=${offset}&sort=asc&apikey=${api}`);
         
         // Check if there's an error or no results
         if (res.data.status === "0" || res.data.result.length === 0) {
