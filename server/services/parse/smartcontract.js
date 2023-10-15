@@ -12,9 +12,25 @@ const get_transactions = async (contract) => {
 const scan = async (chain, address) => {
 
     if(chain == 'bsc'){
-        api = process.env.BSCSCAN_API
-        const url = `https://api.bscscan.com/api?module=account&action=tokentx`
-        return await get_history(address, api, url)
+        api = process.env.BSCSCAN_API;
+        const url = `https://api.bscscan.com/api?module=account&action=tokentx`;
+        return await get_history(address, api, url);
+    } else if (chain == 'eth') {
+        api = process.env.ETHSCAN_API;
+        const url = `https://api.etherscan.io/api?module=account&action=tokentx`;
+        return await get_history(address, api, url);
+    } else if (chain == 'arb') {
+        api = process.env.ARBSCAN_API;
+        const url = `https://api.arbiscan.io/api?module=account&action=tokentx`;
+        return await get_history(address, api, url);
+    } else if (chain == 'polygon') {
+        api = process.env.POLYGONSCAN_API;
+        const url = `https://api.polygonscan.com/api?module=account&action=tokentx`;
+        return await get_history(address, api, url);
+    } else if (chain == 'avalanche') {
+        api = process.env.SNOWTRACE_API;
+        const url = `https://api.snowtrace.io/api?module=account&action=tokentx`;
+        return await get_history(address, api, url);
     }
 }
 
