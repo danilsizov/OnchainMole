@@ -54,3 +54,9 @@ const get_history = async (address, api, url) => {
 
     return transactions
 }
+
+const transactionService = {
+    get_transactions
+}
+
+module.exports = transactionService
