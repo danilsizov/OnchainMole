@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const parse_transactions = require('../services/parse/transactions')
+const parse_transactions = require('../services/parse/smartcontract')
 const process_transactions = require('../services/process/transactions')
 const aggregate_transactions = require('../services/aggregate/transactions')
 
