@@ -2,10 +2,19 @@
     <div class="container">
         <div class="row mb-5">
             <div class="col-10">
-                <input class="contract_input_input" v-model="contract"/>
+                <input class="contract_input_input" v-model="contract" />
             </div>
-            <div class="col-2 d-flex justify-content-end">
-                <button class="contract_input_btn" @click="getTransactions" >Get Data</button>
+            <div class="col-1 d-flex">
+                <select class="contract_net_select" v-model="selectedNetwork">
+                    <option value="BSC">BSC</option>
+                    <option value="Ethereum">Ethereum</option>
+                    <option value="Arbitrum">Arbitrum</option>
+                    <option value="Polygon">Polygon</option>
+                    <option value="Avalanche">Avalanche</option>`
+                </select>
+            </div>
+            <div class="col-1 d-flex">
+                <button class="contract_input_btn" @click="getTransactions">Get Data</button>
             </div>
         </div>
         <div class="row">
@@ -13,16 +22,10 @@
                 <div class="custom_card">
                     <div class="card_title">
                         Total Amount of Deposits/Withdrawals
-                    </div>  
+                    </div>
                     <div class="xl_card_content">
-                        <Bar
-                            id="my-chart-id"
-                            :key="chartUpdateKey"
-                            :options="chartOptionsU"
-                            :data="chartDataU"
-                            v-if="loaded"
-                            class="med_chart"
-                        />
+                        <Bar id="my-chart-id" :key="chartUpdateKey" :options="chartOptionsU" :data="chartDataU"
+                            v-if="loaded" class="med_chart" />
                     </div>
                 </div>
             </div>
@@ -32,25 +35,25 @@
                 <div class="custom_card">
                     <div class="card_title">
                         Active users/All users
-                    </div> 
+                    </div>
                     <div class="card_content_text">
                         {{ users_amount.active }} / {{ users_amount.all }}
-                    </div> 
+                    </div>
                 </div>
                 <div class="custom_card">
                     <div class="card_title">
                         Total tokens supply
-                    </div>  
+                    </div>
                     <div class="card_content_text">
                         {{ total_supply }}
-                    </div> 
+                    </div>
                 </div>
             </div>
             <div class="col-6">
                 <div class="custom_card">
                     <div class="card_title">
                         Shares of user's TVL
-                    </div>  
+                    </div>
                     <div class="card_content">
                         <Doughnut :data="doughnutData" :options="doughnutOptions" />
                     </div>
@@ -62,7 +65,7 @@
                 <div class="custom_card">
                     <div class="card_title">
                         Users segmentation by TVL
-                    </div>  
+                    </div>
                 </div>
             </div>
         </div>
@@ -71,7 +74,7 @@
                 <div class="custom_card">
                     <div class="card_title">
                         Deposit/Withdrawal by segments
-                    </div>  
+                    </div>
                 </div>
             </div>
         </div>
@@ -89,25 +92,26 @@ export default {
     name: 'ContractInput',
     components: { Bar, Doughnut },
     computed: {
-      chartDataU() { return this.chartData },
-      chartOptionsU() { return this.chartOptions  }
+        chartDataU() { return this.chartData },
+        chartOptionsU() { return this.chartOptions }
     },
     data() {
         return {
             contract: '0xe2AD2c5702f6c9073f85b00E4743066E1D1035f8',
             transations: [],
             chartData: {
-                labels: [  ],
-                datasets: [ { 
+                labels: [],
+                datasets: [{
                     label: 'Deposits',
-                    data: [], 
-                    backgroundColor: 'green' 
-                } ],
+                    data: [],
+                    backgroundColor: 'green'
+                }],
             },
+            selectedNetwork: 'BSC',
             chartOptions: {
                 responsive: true,
                 maintainAspectRatio: false
-            }, 
+            },
             doughnutOptions: {
                 responsive: true,
                 maintainAspectRatio: false,
@@ -116,7 +120,7 @@ export default {
                         display: false,
                     }
                 }
-            }, 
+            },
             doughnutData: {
                 labels: [],
                 datasets: [{
@@ -132,9 +136,9 @@ export default {
         }
     },
     methods: {
-        async getTransactions(){
-            await axios.get('http://localhost:2000/?contract=' + this.contract)
-                .then( (res) => {
+        async getTransactions() {
+            await axios.get('http://localhost:2000/?contract=' + this.contract + '&network=' + this.selectedNetwork)
+                .then((res) => {
                     console.log(res.data.transactions)
 
                     let transactions = res.data.transactions
@@ -148,9 +152,9 @@ export default {
                         labels: transactions.users_shares.labels,
                         datasets: [
                             {
-                                data: transactions.users_shares.data, 
+                                data: transactions.users_shares.data,
                                 backgroundColor: transactions.users_shares.backgroundColor
-                            }, 
+                            },
                         ]
                     }
 
@@ -210,79 +214,89 @@ export default {
 </script>
 
 <style>
-    .b-container{
-        margin-right: 20px;
-    }
-    .contract_input_input{
-        border-radius: 0.4285rem;
-        font-size: .7500000025rem;
-        -webkit-transition: color .3s ease-in-out,border-color .3s ease-in-out,background-color .3s ease-in-out;
-        transition: color .3s ease-in-out,border-color .3s ease-in-out,background-color .3s ease-in-out;
-        padding: 10px 18px;
-        display: block;
-        width: 100%;
-        height: calc(2.25rem + 2px);
-        font-weight: 400;
-        line-height: 1.428571;
-        color: hsla(0,0%,100%,.8);
-        background-color: transparent;
-        background-clip: padding-box;
-        border: 1px solid #2b3553;
-        box-sizing: border-box;
-    }
+.b-container {
+    margin-right: 20px;
+}
 
-    .contract_input_btn{
-        cursor: pointer;
-        background: #e14eca;
-        background-image: -webkit-gradient(linear,right top,left bottom,from(#e14eca),color-stop(#ba54f5),to(#e14eca));
-        background-image: linear-gradient(to bottom left,#e14eca,#ba54f5,#e14eca);
-        background-size: 210% 210%;
-        background-position: 100% 0;
-        background-color: #e14eca;
-        -webkit-transition: all .15s ease;
-        transition: all .15s ease;
-        -webkit-box-shadow: none;
-        box-shadow: none;
-        color: #fff;
-        border: none;
-        border-radius: 0.4285rem;
-        padding: 0px 40px;
-        height: 38px;
-        font-size: .875rem;
-        line-height: 1.35em;
-        font-weight: 600;
-    }
+.contract_input_input {
+    padding: 10px 18px;
+}
 
-    .contract_input_card{
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-    }
-    .custom_card{
-        background: #27293d;
-        border: 0;
-        width: 100%;
-        margin-bottom: 30px;
-        overflow: hidden;
-        padding: 15px 5px;
-        box-sizing: border-box;
-    }
+.contract_net_select {
+    padding: 10px 8px;
+}
 
-    .card_title{
-        font-size: 20px;
-        color: white;
-        font-weight: 200;
-        text-align: left;
-        padding-left: 20px;
-    }
+.contract_input_input,
+.contract_net_select {
+    border-radius: 0.4285rem;
+    font-size: .7500000025rem;
+    -webkit-transition: color .3s ease-in-out, border-color .3s ease-in-out, background-color .3s ease-in-out;
+    transition: color .3s ease-in-out, border-color .3s ease-in-out, background-color .3s ease-in-out;
+    display: block;
+    width: 100%;
+    height: calc(2.25rem + 2px);
+    font-weight: 400;
+    line-height: 1.428571;
+    color: hsla(0, 0%, 100%, .8);
+    background-color: transparent;
+    background-clip: padding-box;
+    border: 1px solid #2b3553;
+    box-sizing: border-box;
+}
 
-    .xl_card_content{
-        height: 450px;
-    }
+.contract_input_btn {
+    cursor: pointer;
+    background: #e14eca;
+    background-image: -webkit-gradient(linear, right top, left bottom, from(#e14eca), color-stop(#ba54f5), to(#e14eca));
+    background-image: linear-gradient(to bottom left, #e14eca, #ba54f5, #e14eca);
+    background-size: 210% 210%;
+    background-position: 100% 0;
+    background-color: #e14eca;
+    -webkit-transition: all .15s ease;
+    transition: all .15s ease;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+    color: #fff;
+    border: none;
+    border-radius: 0.4285rem;
+    padding: 0px 40px;
+    height: 38px;
+    font-size: .875rem;
+    line-height: 1.35em;
+    font-weight: 600;
+}
 
-    .card_content_text{
-        color: white;
-        font-size: 56px;
-        font-weight: 900;
-    }
+.contract_input_card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.custom_card {
+    background: #27293d;
+    border: 0;
+    width: 100%;
+    margin-bottom: 30px;
+    overflow: hidden;
+    padding: 15px 5px;
+    box-sizing: border-box;
+}
+
+.card_title {
+    font-size: 20px;
+    color: white;
+    font-weight: 200;
+    text-align: left;
+    padding-left: 20px;
+}
+
+.xl_card_content {
+    height: 450px;
+}
+
+.card_content_text {
+    color: white;
+    font-size: 56px;
+    font-weight: 900;
+}
 </style>
