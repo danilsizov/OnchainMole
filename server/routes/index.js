@@ -3,6 +3,7 @@ const router = express.Router();
 const parse_transactions = require('../services/parse/smartcontract')
 const process_transactions = require('../services/process/transactions')
 const aggregate_transactions = require('../services/aggregate/transactions')
+const getPoolInvestorsClusters = require('../services/segments/poolInvestors')
 
 /* GET home page. */
 router.get('/', async function(req, res, next) {
@@ -28,6 +29,8 @@ router.get('/', async function(req, res, next) {
   })
   
   transactions.users_shares = users_shares
+
+  transactions.segments = await getPoolInvestorsClusters(transactions.users)
 
 
   res.send({ transactions: transactions });
