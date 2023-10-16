@@ -1,10 +1,10 @@
 <template>
     <div class="container">
         <div class="row mb-5">
-            <div class="col-10">
+            <div class="col-8">
                 <input class="contract_input_input" v-model="contract" />
             </div>
-            <div class="col-1 d-flex">
+            <div class="col-2 d-flex">
                 <select class="contract_net_select" v-model="selectedNetwork">
                     <option value="BSC">BSC</option>
                     <option value="Ethereum">Ethereum</option>
@@ -13,7 +13,7 @@
                     <option value="Avalanche">Avalanche</option>`
                 </select>
             </div>
-            <div class="col-1 d-flex">
+            <div class="col-2 d-flex">
                 <button class="contract_input_btn" @click="getTransactions">Get Data</button>
             </div>
         </div>
@@ -64,7 +64,10 @@
             <div class="col">
                 <div class="custom_card">
                     <div class="card_title">
-                        Users segmentation by TVL
+                        Users segmentation by pool data
+                    </div>
+                    <div class="card_content pool_segments">
+                        <Bubble :data="poolSegmentData" :key="chartUpdateKey" :options="poolSegmentOptions" />
                     </div>
                 </div>
             </div>
@@ -82,18 +85,20 @@
 </template>
 
 <script>
-import { Bar, Doughnut } from 'vue-chartjs'
-import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, ArcElement, } from 'chart.js'
+import { Bar, Doughnut, Bubble } from 'vue-chartjs'
+import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, ArcElement, PointElement, LogarithmicScale} from 'chart.js'
 
-ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, ArcElement)
+ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, ArcElement, PointElement, LogarithmicScale)
 
 import axios from 'axios';
 export default {
     name: 'ContractInput',
-    components: { Bar, Doughnut },
+    components: { Bar, Doughnut, Bubble },
     computed: {
         chartDataU() { return this.chartData },
-        chartOptionsU() { return this.chartOptions }
+        chartOptionsU() { return this.chartOptions },
+        chartPoolSegmentDataU() { return this.poolSegmentData },
+        chartPoolSegmentOptionsU() { return this.poolSegmentOptions }
     },
     data() {
         return {
@@ -126,6 +131,50 @@ export default {
                 datasets: [{
                     data: []
                 }]
+            },
+            poolSegmentData: {
+                datasets:[]
+            },
+            poolSegmentOptions: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false,
+                    }
+                },
+                scales: {
+                    y: { // Specify the y-axis here
+                        type: 'logarithmic',
+                        position: 'left',
+                        ticks: {
+                            min: 1, // minimum value for logarithmic scale should be greater than 0
+                            max: 200, // example maximum value
+                            callback: function(value) {
+                                return Number(value.toString()); // return value
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Logarithmic Scale'
+                        }
+                    },
+                    x: { // Specify the y-axis here
+                        type: 'logarithmic',
+                        position: 'left',
+                        ticks: {
+                            min: 0.5, // minimum value for logarithmic scale should be greater than 0
+                            max: 8000, // example maximum value
+                            callback: function(value) {
+                                return Number(value.toString()); // return value
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Logarithmic Scale'
+                        }
+                    }
+                }
             },
             loaded: false,
             chartUpdateKey: 0,
@@ -173,6 +222,22 @@ export default {
                             },
                         ]
                     };
+
+                    transactions.segments.averageLinkClusters.forEach( (segment, index) => {
+                        let addresses = []
+                        segment.forEach( (address) => {
+                            addresses.push({
+                                x: address.total_volume,
+                                y: address.txs_amount,
+                                r: 10
+                            })
+                        })
+                        this.poolSegmentData.datasets.push({
+                            backgroundColor: 'rgb(' + Math.floor(Math.random() * 255) + ',' + Math.floor(Math.random() * 255) + ',' + Math.floor(Math.random() * 255) + ')',
+                            label: index,
+                            data: addresses
+                        })
+                    })
                     this.loaded = true;
                     this.chartUpdateKey++;
                 })
@@ -298,5 +363,9 @@ export default {
     color: white;
     font-size: 56px;
     font-weight: 900;
+}
+
+.pool_segments{
+    height: 600px;
 }
 </style>
