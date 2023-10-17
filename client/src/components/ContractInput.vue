@@ -35,6 +35,36 @@
             </div>
         </div>
         <div class="row">
+            <div class="col-12">
+                <button @click="changeData('option1')">Option1</button>
+                <button @click="changeData('option2')">Option2</button>
+                <button @click="changeData('option3')">Option3</button>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-8 col-sm-12">
+                <table class="table table-dark table-striped">
+                    <thead>
+                        <tr>
+                            <th>Chain</th>
+                            <th>Users</th>
+                            <th>Liquidity</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="item in tableData" :key="item.chain">
+                            <td>{{ item.chain }}</td>
+                            <td>{{ item.users }}</td>
+                            <td>{{ item.liquidity }} $</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-lg-4 col-sm-12">
+                <Doughnut :data="doughnutLiquidityData" :options="doughnutLiquidityOptions" />
+            </div>
+        </div>
+        <div class="row">
             <div class="col-6">
                 <div class="custom_card">
                     <div class="card_title">
@@ -138,6 +168,22 @@ export default {
                 all: 0, active: 0
             },
             total_supply: 0,
+            tableData: [],
+            doughnutLiquidityData: {
+                labels: [],
+                datasets: [{
+                    data: []
+                }]
+            },
+            doughnutLiquidityOptions: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false,
+                    }
+                },
+            },
         }
     },
     methods: {
@@ -145,6 +191,35 @@ export default {
             this.isLoading = true; // начинаем загрузку
 
             try {
+                this.tableData = [
+                    {
+                        chain: 'BSC',
+                        users: '1200',
+                        liquidity: '500'
+                    },
+                    {
+                        chain: 'Avalanche',
+                        users: '1500',
+                        liquidity: '600'
+                    },
+                    {
+                        chain: 'Arbitrum',
+                        users: '14200',
+                        liquidity: '700'
+                    },
+                    {
+                        chain: 'Ethereum',
+                        users: '120012312',
+                        liquidity: '800'
+                    },
+                ]
+                this.doughnutLiquidityData = {
+                    labels: this.tableData.map(item => item.chain),
+                    datasets: [{
+                        data: this.tableData.map(item => item.liquidity),
+                        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0'] // Здесь вы можете задать свои цвета
+                    }]
+                };
                 const res = await axios.get('http://localhost:2000/?contract=' + this.contract + '&network=' + this.selectedNetwork);
 
                 let transactions = res.data.transactions;
@@ -218,6 +293,89 @@ export default {
                 default:
                     return parseFloat(value).toFixed(6);
             }
+        },
+        updateDoughnutLiquidity() {
+            this.doughnutLiquidityData = {
+                labels: this.tableData.map(item => item.chain),
+                datasets: [{
+                    data: this.tableData.map(item => item.liquidity),
+                    backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0'] // Здесь вы можете задать свои цвета
+                }]
+            };
+        },
+        changeData(option) {
+            if (option === 'option1') {
+                this.tableData = [
+                    {
+                        chain: 'BSC',
+                        users: '1200',
+                        liquidity: '1500'
+                    },
+                    {
+                        chain: 'Avalanche',
+                        users: '1500',
+                        liquidity: '1600'
+                    },
+                    {
+                        chain: 'Arbitrum',
+                        users: '14200',
+                        liquidity: '1700'
+                    },
+                    {
+                        chain: 'Ethereum',
+                        users: '120012312',
+                        liquidity: '1800'
+                    },
+                ];
+            } else if (option === 'option2') {
+                this.tableData = [
+                    {
+                        chain: 'BSC',
+                        users: '1200',
+                        liquidity: '2500'
+                    },
+                    {
+                        chain: 'Avalanche',
+                        users: '1500',
+                        liquidity: '2600'
+                    },
+                    {
+                        chain: 'Arbitrum',
+                        users: '14200',
+                        liquidity: '2700'
+                    },
+                    {
+                        chain: 'Ethereum',
+                        users: '120012312',
+                        liquidity: '2800'
+                    },
+                ];
+            } else if (option === 'option3') {
+                this.tableData = [
+                    {
+                        chain: 'BSC',
+                        users: '1200',
+                        liquidity: '5500'
+                    },
+                    {
+                        chain: 'Avalanche',
+                        users: '1500',
+                        liquidity: '5600'
+                    },
+                    {
+                        chain: 'Arbitrum',
+                        users: '14200',
+                        liquidity: '10700'
+                    },
+                    {
+                        chain: 'Ethereum',
+                        users: '120012312',
+                        liquidity: '3800'
+                    },
+                ];
+            }
+            this.updateDoughnutLiquidity();
+
         }
     }
 }
