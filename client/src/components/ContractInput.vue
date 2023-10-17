@@ -81,6 +81,11 @@
                 </div>
             </div>
         </div>
+        <div class="row">
+            <div class="col">
+                <button class="contract_input_btn" @click="getAddressesData">Get Full Addresses Data</button>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -192,6 +197,7 @@ export default {
 
                     let transactions = res.data.transactions
 
+                    this.transactions = transactions
                     this.users_amount.all = transactions.users_amount.all
                     this.users_amount.active = transactions.users_amount.active
 
@@ -273,6 +279,10 @@ export default {
                 default:
                     return parseFloat(value).toFixed(6);
             }
+        },
+
+        async getAddressesData(){
+            await axios.post('http://localhost:2000/addresses', { addresses: this.transactions.users })
         }
     }
 }

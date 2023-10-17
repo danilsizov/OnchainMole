@@ -5,11 +5,17 @@ const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const cors = require('cors')
 
+const bodyParser = require('body-parser');
+
+
 const indexRouter = require('./routes/index');
 
 const app = express();
 
 app.use(cors())
+
+app.use(bodyParser.json({ limit: '50mb' }));
+app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
