@@ -6,7 +6,7 @@
             </div>
             <div class="col-1 d-flex">
                 <select class="contract_net_select" v-model="selectedNetwork">
-                    <option value="BSC">BSC</option>
+                    <option value="BSC"> BSC</option>
                     <option value="Ethereum">Ethereum</option>
                     <option value="Arbitrum">Arbitrum</option>
                     <option value="Polygon">Polygon</option>
@@ -14,7 +14,11 @@
                 </select>
             </div>
             <div class="col-1 d-flex">
-                <button class="contract_input_btn" @click="getTransactions">Get Data</button>
+                <button class="contract_input_btn" @click="getTransactions">
+                    <div v-if="isLoading" class="loader"></div>
+                    <span v-if="isLoading">Loading</span> <!-- Это ваша анимация загрузки -->
+                    <span v-else>Get Data</span>
+                </button>
             </div>
         </div>
         <div class="row">
@@ -99,6 +103,7 @@ export default {
         return {
             contract: '0xe2AD2c5702f6c9073f85b00E4743066E1D1035f8',
             transations: [],
+            isLoading: false,
             chartData: {
                 labels: [],
                 datasets: [{
@@ -132,50 +137,55 @@ export default {
             users_amount: {
                 all: 0, active: 0
             },
-            total_supply: 0
+            total_supply: 0,
         }
     },
     methods: {
         async getTransactions() {
-            await axios.get('http://localhost:2000/?contract=' + this.contract + '&network=' + this.selectedNetwork)
-                .then((res) => {
-                    console.log(res.data.transactions)
+            this.isLoading = true; // начинаем загрузку
 
-                    let transactions = res.data.transactions
+            try {
+                const res = await axios.get('http://localhost:2000/?contract=' + this.contract + '&network=' + this.selectedNetwork);
 
-                    this.users_amount.all = transactions.users_amount.all
-                    this.users_amount.active = transactions.users_amount.active
+                let transactions = res.data.transactions;
 
-                    this.total_supply = this.formatNumber(transactions.total_supply);
+                this.users_amount.all = transactions.users_amount.all;
+                this.users_amount.active = transactions.users_amount.active;
+                this.total_supply = this.formatNumber(transactions.total_supply);
 
-                    this.doughnutData = {
-                        labels: transactions.users_shares.labels,
-                        datasets: [
-                            {
-                                data: transactions.users_shares.data,
-                                backgroundColor: transactions.users_shares.backgroundColor
-                            },
-                        ]
-                    }
+                this.doughnutData = {
+                    labels: transactions.users_shares.labels,
+                    datasets: [
+                        {
+                            data: transactions.users_shares.data,
+                            backgroundColor: transactions.users_shares.backgroundColor
+                        }
+                    ]
+                };
 
-                    this.chartData = {
-                        labels: transactions.txGraph.deposit.aggregatedLabels,
-                        datasets: [
-                            {
-                                label: 'Deposits',
-                                data: transactions.txGraph.deposit.aggregatedDepositData,
-                                backgroundColor: '#389466'
-                            },
-                            {
-                                label: 'Withdrawal',
-                                data: transactions.txGraph.withdrawal.aggregatedWithdrawalData,
-                                backgroundColor: 'red'
-                            },
-                        ]
-                    };
-                    this.loaded = true;
-                    this.chartUpdateKey++;
-                })
+                this.chartData = {
+                    labels: transactions.txGraph.deposit.aggregatedLabels,
+                    datasets: [
+                        {
+                            label: 'Deposits',
+                            data: transactions.txGraph.deposit.aggregatedDepositData,
+                            backgroundColor: '#389466'
+                        },
+                        {
+                            label: 'Withdrawal',
+                            data: transactions.txGraph.withdrawal.aggregatedWithdrawalData,
+                            backgroundColor: 'red'
+                        }
+                    ]
+                };
+
+                this.loaded = true;
+                this.chartUpdateKey++;
+            } catch (error) {
+                console.error("Ошибка при получении данных:", error);
+            } finally {
+                this.isLoading = false; // завершаем загрузку
+            }
         },
 
         formatNumber(value) {
@@ -213,7 +223,11 @@ export default {
 }
 </script>
 
-<style>
+<style lang="scss">
+* {
+    outline: none;
+}
+
 .b-container {
     margin-right: 20px;
 }
@@ -259,12 +273,22 @@ export default {
     color: #fff;
     border: none;
     border-radius: 0.4285rem;
-    padding: 0px 40px;
     height: 38px;
+    width: 100%;
+    padding: 0;
+    line-height: 38px;
     font-size: .875rem;
     line-height: 1.35em;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
     font-weight: 600;
+
+    span {
+        text-align: center;
+    }
 }
+
 
 .contract_input_card {
     display: flex;
@@ -298,5 +322,26 @@ export default {
     color: white;
     font-size: 56px;
     font-weight: 900;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.loader {
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #3498db;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    animation: spin 1s linear infinite;
+    display: inline-block;
+    vertical-align: middle;
 }
 </style>
