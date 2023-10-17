@@ -20,11 +20,13 @@ const hierarchyCluster = async (data, keys, weights, linkageMethod, distanceThre
 
     let currentClusters = new Set(data.map(item => item.cluster));
 
-    while (currentClusters.size > maxClusters) {
+    while (currentClusters.size < maxClusters) {
         // Find the two closest clusters using Ward's method
         let [i, j, minDistance] = findClosestClusters(distanceMatrix, clusterSizes);
 
-        if (minDistance > distanceThreshold) {
+        const dynamicDistanceThreshold = (currentClusters.size <= maxClusters) ? distanceThreshold : Infinity;
+
+        if (minDistance > dynamicDistanceThreshold) {
             break;
         }
       
