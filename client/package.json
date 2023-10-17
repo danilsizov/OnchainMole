@@ -9,11 +9,14 @@
   },
   "dependencies": {
     "@popperjs/core": "^2.11.8",
+    "@wagmi/core": "^1.4.3",
+    "@web3modal/wagmi": "^3.1.0",
     "axios": "^1.5.0",
     "bootstrap": "^5.3.1",
     "bootstrap-vue": "^2.23.1",
     "chart.js": "^4.4.0",
     "core-js": "^3.8.3",
+    "viem": "^1.16.6",
     "vue": "^3.3.4",
     "vue-axios": "^3.5.2",
     "vue-chartjs": "^5.2.0"
