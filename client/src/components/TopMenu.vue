@@ -24,6 +24,7 @@
   top: 0;
   left: 0;
   background: #1F2336;
+  z-index: 2;
 }
 
 .wallet_connect {

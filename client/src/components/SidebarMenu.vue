@@ -40,7 +40,7 @@
   position: fixed;
   top: 0;
   left: 0;
-  z-index: 1;
+  z-index: 3;
   // box-shadow: 0 0 45px 0 rgba(0, 0, 0, .6);
   border-radius: 5px;
   display: block;
@@ -67,6 +67,7 @@
   height: 100vh;
   position: relative;
   padding: 0px 10px 20px 10px;
+  z-index: 3;
 }
 
 .sidebar_menu_item {

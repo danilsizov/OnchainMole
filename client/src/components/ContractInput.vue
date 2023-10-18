@@ -59,7 +59,7 @@
             </div>
             <div class="row">
                 <div class="col-lg-8 col-sm-12">
-                    <table class="table table-dark table-striped table-hover">
+                    <table class="table table-striped table-hover">
                         <thead>
                             <tr>
                                 <th>Chain</th>
@@ -490,6 +490,9 @@ export default {
 </script>
 
 <style lang="scss">
+$table-bg: red !important;
+$table-color: red !important;
+
 * {
     outline: none;
 }
@@ -641,4 +644,9 @@ export default {
 
 .liquidity-options {
     margin-bottom: 15px;
-}</style>
+}
+
+.table {
+    border-radius: 5px;
+}
+</style>
