@@ -6,15 +6,21 @@
             </div>
             <div class="col-2 d-flex">
                 <select class="contract_net_select" v-model="selectedNetwork">
-                    <option value="BSC">BSC</option>
+                    <option value="BSC"> BSC</option>
                     <option value="Ethereum">Ethereum</option>
                     <option value="Arbitrum">Arbitrum</option>
                     <option value="Polygon">Polygon</option>
                     <option value="Avalanche">Avalanche</option>`
                 </select>
             </div>
-            <div class="col-2 d-flex">
-                <button class="contract_input_btn" @click="getTransactions">Get Data</button>
+
+            <div class="col-1 d-flex">
+                <button class="contract_input_btn" @click="getTransactions">
+                    <div v-if="isLoading" class="loader"></div>
+                    <span v-if="isLoading">Loading</span> <!-- Это ваша анимация загрузки -->
+                    <span v-else>Get Data</span>
+                </button>
+
             </div>
         </div>
         <div class="row">
@@ -28,6 +34,36 @@
                             v-if="loaded" class="med_chart" />
                     </div>
                 </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <button @click="changeData('option1')">Option1</button>
+                <button @click="changeData('option2')">Option2</button>
+                <button @click="changeData('option3')">Option3</button>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-8 col-sm-12">
+                <table class="table table-dark table-striped">
+                    <thead>
+                        <tr>
+                            <th>Chain</th>
+                            <th>Users</th>
+                            <th>Liquidity</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="item in tableData" :key="item.chain">
+                            <td>{{ item.chain }}</td>
+                            <td>{{ item.users }}</td>
+                            <td>{{ item.liquidity }} $</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-lg-4 col-sm-12">
+                <Doughnut :data="doughnutLiquidityData" :options="doughnutLiquidityOptions" />
             </div>
         </div>
         <div class="row">
@@ -109,6 +145,7 @@ export default {
         return {
             contract: '0xe2AD2c5702f6c9073f85b00E4743066E1D1035f8',
             transations: [],
+            isLoading: false,
             chartData: {
                 labels: [],
                 datasets: [{
@@ -186,32 +223,94 @@ export default {
             users_amount: {
                 all: 0, active: 0
             },
-            total_supply: 0
+            total_supply: 0,
+            tableData: [],
+            doughnutLiquidityData: {
+                labels: [],
+                datasets: [{
+                    data: []
+                }]
+            },
+            doughnutLiquidityOptions: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false,
+                    }
+                },
+            },
         }
     },
     methods: {
         async getTransactions() {
-            await axios.get('http://localhost:2000/?contract=' + this.contract + '&network=' + this.selectedNetwork)
-                .then((res) => {
-                    console.log(res.data.transactions)
+            this.isLoading = true; // начинаем загрузку
 
-                    let transactions = res.data.transactions
+            try {
+                this.tableData = [
+                    {
+                        chain: 'BSC',
+                        users: '1200',
+                        liquidity: '500'
+                    },
+                    {
+                        chain: 'Avalanche',
+                        users: '1500',
+                        liquidity: '600'
+                    },
+                    {
+                        chain: 'Arbitrum',
+                        users: '14200',
+                        liquidity: '700'
+                    },
+                    {
+                        chain: 'Ethereum',
+                        users: '120012312',
+                        liquidity: '800'
+                    },
+                ]
+                this.doughnutLiquidityData = {
+                    labels: this.tableData.map(item => item.chain),
+                    datasets: [{
+                        data: this.tableData.map(item => item.liquidity),
+                        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0'] // Здесь вы можете задать свои цвета
+                    }]
+                };
+                const res = await axios.get('http://localhost:2000/?contract=' + this.contract + '&network=' + this.selectedNetwork);
 
                     this.transactions = transactions
                     this.users_amount.all = transactions.users_amount.all
                     this.users_amount.active = transactions.users_amount.active
 
-                    this.total_supply = this.formatNumber(transactions.total_supply);
+                this.users_amount.all = transactions.users_amount.all;
+                this.users_amount.active = transactions.users_amount.active;
+                this.total_supply = this.formatNumber(transactions.total_supply);
 
-                    this.doughnutData = {
-                        labels: transactions.users_shares.labels,
-                        datasets: [
-                            {
-                                data: transactions.users_shares.data,
-                                backgroundColor: transactions.users_shares.backgroundColor
-                            },
-                        ]
-                    }
+                this.doughnutData = {
+                    labels: transactions.users_shares.labels,
+                    datasets: [
+                        {
+                            data: transactions.users_shares.data,
+                            backgroundColor: transactions.users_shares.backgroundColor
+                        }
+                    ]
+                };
+
+                this.chartData = {
+                    labels: transactions.txGraph.deposit.aggregatedLabels,
+                    datasets: [
+                        {
+                            label: 'Deposits',
+                            data: transactions.txGraph.deposit.aggregatedDepositData,
+                            backgroundColor: '#389466'
+                        },
+                        {
+                            label: 'Withdrawal',
+                            data: transactions.txGraph.withdrawal.aggregatedWithdrawalData,
+                            backgroundColor: 'red'
+                        }
+                    ]
+                };
 
                     this.chartData = {
                         labels: transactions.txGraph.deposit.aggregatedLabels,
@@ -247,6 +346,7 @@ export default {
                     this.loaded = true;
                     this.chartUpdateKey++;
                 })
+
         },
 
         formatNumber(value) {
@@ -281,14 +381,101 @@ export default {
             }
         },
 
+
         async getAddressesData(){
             await axios.post('http://localhost:2000/addresses', { addresses: this.transactions.users })
+        updateDoughnutLiquidity() {
+            this.doughnutLiquidityData = {
+                labels: this.tableData.map(item => item.chain),
+                datasets: [{
+                    data: this.tableData.map(item => item.liquidity),
+                    backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0'] // Здесь вы можете задать свои цвета
+                }]
+            };
+        },
+        changeData(option) {
+            if (option === 'option1') {
+                this.tableData = [
+                    {
+                        chain: 'BSC',
+                        users: '1200',
+                        liquidity: '1500'
+                    },
+                    {
+                        chain: 'Avalanche',
+                        users: '1500',
+                        liquidity: '1600'
+                    },
+                    {
+                        chain: 'Arbitrum',
+                        users: '14200',
+                        liquidity: '1700'
+                    },
+                    {
+                        chain: 'Ethereum',
+                        users: '120012312',
+                        liquidity: '1800'
+                    },
+                ];
+            } else if (option === 'option2') {
+                this.tableData = [
+                    {
+                        chain: 'BSC',
+                        users: '1200',
+                        liquidity: '2500'
+                    },
+                    {
+                        chain: 'Avalanche',
+                        users: '1500',
+                        liquidity: '2600'
+                    },
+                    {
+                        chain: 'Arbitrum',
+                        users: '14200',
+                        liquidity: '2700'
+                    },
+                    {
+                        chain: 'Ethereum',
+                        users: '120012312',
+                        liquidity: '2800'
+                    },
+                ];
+            } else if (option === 'option3') {
+                this.tableData = [
+                    {
+                        chain: 'BSC',
+                        users: '1200',
+                        liquidity: '5500'
+                    },
+                    {
+                        chain: 'Avalanche',
+                        users: '1500',
+                        liquidity: '5600'
+                    },
+                    {
+                        chain: 'Arbitrum',
+                        users: '14200',
+                        liquidity: '10700'
+                    },
+                    {
+                        chain: 'Ethereum',
+                        users: '120012312',
+                        liquidity: '3800'
+                    },
+                ];
+            }
+            this.updateDoughnutLiquidity();
+
         }
     }
 }
 </script>
 
-<style>
+<style lang="scss">
+* {
+    outline: none;
+}
+
 .b-container {
     margin-right: 20px;
 }
@@ -334,12 +521,22 @@ export default {
     color: #fff;
     border: none;
     border-radius: 0.4285rem;
-    padding: 0px 40px;
     height: 38px;
+    width: 100%;
+    padding: 0;
+    line-height: 38px;
     font-size: .875rem;
     line-height: 1.35em;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
     font-weight: 600;
+
+    span {
+        text-align: center;
+    }
 }
+
 
 .contract_input_card {
     display: flex;
@@ -375,7 +572,29 @@ export default {
     font-weight: 900;
 }
 
+
 .pool_segments{
     height: 600px;
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.loader {
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #3498db;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    animation: spin 1s linear infinite;
+    display: inline-block;
+    vertical-align: middle;
+
 }
 </style>

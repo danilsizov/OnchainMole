@@ -67,6 +67,7 @@ const get_history = async (address, api, url) => {
 
         startblock = parseInt(res.data.result[res.data.result.length - 1].blockNumber) + 1;
     }
+    console.log(transactions);
 
     return transactions
 }
