@@ -127,7 +127,7 @@
 
 <script>
 import { Bar, Doughnut, Bubble } from 'vue-chartjs'
-import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, ArcElement, PointElement, LogarithmicScale} from 'chart.js'
+import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, ArcElement, PointElement, LogarithmicScale } from 'chart.js'
 
 ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, ArcElement, PointElement, LogarithmicScale)
 
@@ -175,7 +175,7 @@ export default {
                 }]
             },
             poolSegmentData: {
-                datasets:[]
+                datasets: []
             },
             poolSegmentOptions: {
                 responsive: true,
@@ -192,7 +192,7 @@ export default {
                         ticks: {
                             min: 1, // minimum value for logarithmic scale should be greater than 0
                             max: 200, // example maximum value
-                            callback: function(value) {
+                            callback: function (value) {
                                 return Number(value.toString()); // return value
                             }
                         },
@@ -207,7 +207,7 @@ export default {
                         ticks: {
                             min: 0.5, // minimum value for logarithmic scale should be greater than 0
                             max: 8000, // example maximum value
-                            callback: function(value) {
+                            callback: function (value) {
                                 return Number(value.toString()); // return value
                             }
                         },
@@ -244,8 +244,7 @@ export default {
     },
     methods: {
         async getTransactions() {
-            this.isLoading = true; // начинаем загрузку
-
+            this.isLoading = true;
             try {
                 this.tableData = [
                     {
@@ -277,10 +276,10 @@ export default {
                     }]
                 };
                 const res = await axios.get('http://localhost:2000/?contract=' + this.contract + '&network=' + this.selectedNetwork);
-
-                    this.transactions = transactions
-                    this.users_amount.all = transactions.users_amount.all
-                    this.users_amount.active = transactions.users_amount.active
+                let transactions = res.data.transactions;
+                this.transactions = transactions
+                this.users_amount.all = transactions.users_amount.all
+                this.users_amount.active = transactions.users_amount.active
 
                 this.users_amount.all = transactions.users_amount.all;
                 this.users_amount.active = transactions.users_amount.active;
@@ -312,40 +311,42 @@ export default {
                     ]
                 };
 
-                    this.chartData = {
-                        labels: transactions.txGraph.deposit.aggregatedLabels,
-                        datasets: [
-                            {
-                                label: 'Deposits',
-                                data: transactions.txGraph.deposit.aggregatedDepositData,
-                                backgroundColor: '#389466'
-                            },
-                            {
-                                label: 'Withdrawal',
-                                data: transactions.txGraph.withdrawal.aggregatedWithdrawalData,
-                                backgroundColor: 'red'
-                            },
-                        ]
-                    };
+                this.chartData = {
+                    labels: transactions.txGraph.deposit.aggregatedLabels,
+                    datasets: [
+                        {
+                            label: 'Deposits',
+                            data: transactions.txGraph.deposit.aggregatedDepositData,
+                            backgroundColor: '#389466'
+                        },
+                        {
+                            label: 'Withdrawal',
+                            data: transactions.txGraph.withdrawal.aggregatedWithdrawalData,
+                            backgroundColor: 'red'
+                        },
+                    ]
+                };
 
-                    transactions.segments.averageLinkClusters.forEach( (segment, index) => {
-                        let addresses = []
-                        segment.forEach( (address) => {
-                            addresses.push({
-                                x: address.total_volume,
-                                y: address.txs_amount,
-                                r: 10
-                            })
-                        })
-                        this.poolSegmentData.datasets.push({
-                            backgroundColor: 'rgb(' + Math.floor(Math.random() * 255) + ',' + Math.floor(Math.random() * 255) + ',' + Math.floor(Math.random() * 255) + ')',
-                            label: index,
-                            data: addresses
+                transactions.segments.averageLinkClusters.forEach((segment, index) => {
+                    let addresses = []
+                    segment.forEach((address) => {
+                        addresses.push({
+                            x: address.total_volume,
+                            y: address.txs_amount,
+                            r: 10
                         })
                     })
-                    this.loaded = true;
-                    this.chartUpdateKey++;
+                    this.poolSegmentData.datasets.push({
+                        backgroundColor: 'rgb(' + Math.floor(Math.random() * 255) + ',' + Math.floor(Math.random() * 255) + ',' + Math.floor(Math.random() * 255) + ')',
+                        label: index,
+                        data: addresses
+                    })
                 })
+                this.loaded = true;
+                this.chartUpdateKey++;
+            } catch (error) {
+                console.log(error);
+            }
 
         },
 
@@ -382,8 +383,9 @@ export default {
         },
 
 
-        async getAddressesData(){
-            await axios.post('http://localhost:2000/addresses', { addresses: this.transactions.users })
+        async getAddressesData() {
+            await axios.post('http://localhost:2000/addresses', { addresses: this.transactions.users });
+        },
         updateDoughnutLiquidity() {
             this.doughnutLiquidityData = {
                 labels: this.tableData.map(item => item.chain),
@@ -465,7 +467,6 @@ export default {
                 ];
             }
             this.updateDoughnutLiquidity();
-
         }
     }
 }
@@ -573,28 +574,29 @@ export default {
 }
 
 
-.pool_segments{
+.pool_segments {
     height: 600px;
 
-@keyframes spin {
-    0% {
-        transform: rotate(0deg);
+    @keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
     }
 
-    100% {
-        transform: rotate(360deg);
+    .loader {
+        border: 5px solid #f3f3f3;
+        border-top: 5px solid #3498db;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        animation: spin 1s linear infinite;
+        display: inline-block;
+        vertical-align: middle;
+
     }
-}
-
-.loader {
-    border: 5px solid #f3f3f3;
-    border-top: 5px solid #3498db;
-    border-radius: 50%;
-    width: 20px;
-    height: 20px;
-    animation: spin 1s linear infinite;
-    display: inline-block;
-    vertical-align: middle;
-
 }
 </style>
