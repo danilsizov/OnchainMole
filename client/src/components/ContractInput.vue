@@ -61,10 +61,16 @@
                 <div class="col-lg-8 col-sm-12">
                     <table class="table table-striped table-hover">
                         <thead>
-                            <tr>
-                                <th>Chain</th>
-                                <th>Users</th>
-                                <th>Liquidity</th>
+                            <tr class="first-row">
+                                <th>
+                                    Chain
+                                </th>
+                                <th>
+                                    Users
+                                </th>
+                                <th>
+                                    Liquidity
+                                </th>
                             </tr>
                         </thead>
                         <tbody>
@@ -490,11 +496,12 @@ export default {
 </script>
 
 <style lang="scss">
-$table-bg: red !important;
-$table-color: red !important;
-
 * {
     outline: none;
+}
+
+.first-row {
+    font-size: 20px;
 }
 
 .b-container {
