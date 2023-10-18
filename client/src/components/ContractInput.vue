@@ -1,10 +1,10 @@
 <template>
     <div class="container">
         <div class="row mb-5">
-            <div class="col-8">
+            <div class="col-10">
                 <input class="contract_input_input" v-model="contract" />
             </div>
-            <div class="col-2 d-flex">
+            <div class="col-1 d-flex">
                 <select class="contract_net_select" v-model="selectedNetwork">
                     <option value="BSC"> BSC</option>
                     <option value="Ethereum">Ethereum</option>
@@ -13,14 +13,12 @@
                     <option value="Avalanche">Avalanche</option>`
                 </select>
             </div>
-
             <div class="col-1 d-flex">
                 <button class="contract_input_btn" @click="getTransactions">
                     <div v-if="isLoading" class="loader"></div>
                     <span v-if="isLoading">Loading</span> <!-- Это ваша анимация загрузки -->
                     <span v-else>Get Data</span>
                 </button>
-
             </div>
         </div>
         <div class="row">
@@ -100,10 +98,7 @@
             <div class="col">
                 <div class="custom_card">
                     <div class="card_title">
-                        Users segmentation by pool data
-                    </div>
-                    <div class="card_content pool_segments">
-                        <Bubble :data="poolSegmentData" :key="chartUpdateKey" :options="poolSegmentOptions" />
+                        Users segmentation by TVL
                     </div>
                 </div>
             </div>
@@ -117,29 +112,22 @@
                 </div>
             </div>
         </div>
-        <div class="row">
-            <div class="col">
-                <button class="contract_input_btn" @click="getAddressesData">Get Full Addresses Data</button>
-            </div>
-        </div>
     </div>
 </template>
 
 <script>
-import { Bar, Doughnut, Bubble } from 'vue-chartjs'
-import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, ArcElement, PointElement, LogarithmicScale} from 'chart.js'
+import { Bar, Doughnut } from 'vue-chartjs'
+import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, ArcElement, } from 'chart.js'
 
-ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, ArcElement, PointElement, LogarithmicScale)
+ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, ArcElement)
 
 import axios from 'axios';
 export default {
     name: 'ContractInput',
-    components: { Bar, Doughnut, Bubble },
+    components: { Bar, Doughnut },
     computed: {
         chartDataU() { return this.chartData },
-        chartOptionsU() { return this.chartOptions },
-        chartPoolSegmentDataU() { return this.poolSegmentData },
-        chartPoolSegmentOptionsU() { return this.poolSegmentOptions }
+        chartOptionsU() { return this.chartOptions }
     },
     data() {
         return {
@@ -173,50 +161,6 @@ export default {
                 datasets: [{
                     data: []
                 }]
-            },
-            poolSegmentData: {
-                datasets:[]
-            },
-            poolSegmentOptions: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false,
-                    }
-                },
-                scales: {
-                    y: { // Specify the y-axis here
-                        type: 'logarithmic',
-                        position: 'left',
-                        ticks: {
-                            min: 1, // minimum value for logarithmic scale should be greater than 0
-                            max: 200, // example maximum value
-                            callback: function(value) {
-                                return Number(value.toString()); // return value
-                            }
-                        },
-                        title: {
-                            display: true,
-                            text: 'Logarithmic Scale'
-                        }
-                    },
-                    x: { // Specify the y-axis here
-                        type: 'logarithmic',
-                        position: 'left',
-                        ticks: {
-                            min: 0.5, // minimum value for logarithmic scale should be greater than 0
-                            max: 8000, // example maximum value
-                            callback: function(value) {
-                                return Number(value.toString()); // return value
-                            }
-                        },
-                        title: {
-                            display: true,
-                            text: 'Logarithmic Scale'
-                        }
-                    }
-                }
             },
             loaded: false,
             chartUpdateKey: 0,
@@ -278,9 +222,7 @@ export default {
                 };
                 const res = await axios.get('http://localhost:2000/?contract=' + this.contract + '&network=' + this.selectedNetwork);
 
-                    this.transactions = transactions
-                    this.users_amount.all = transactions.users_amount.all
-                    this.users_amount.active = transactions.users_amount.active
+                let transactions = res.data.transactions;
 
                 this.users_amount.all = transactions.users_amount.all;
                 this.users_amount.active = transactions.users_amount.active;
@@ -312,41 +254,13 @@ export default {
                     ]
                 };
 
-                    this.chartData = {
-                        labels: transactions.txGraph.deposit.aggregatedLabels,
-                        datasets: [
-                            {
-                                label: 'Deposits',
-                                data: transactions.txGraph.deposit.aggregatedDepositData,
-                                backgroundColor: '#389466'
-                            },
-                            {
-                                label: 'Withdrawal',
-                                data: transactions.txGraph.withdrawal.aggregatedWithdrawalData,
-                                backgroundColor: 'red'
-                            },
-                        ]
-                    };
-
-                    transactions.segments.averageLinkClusters.forEach( (segment, index) => {
-                        let addresses = []
-                        segment.forEach( (address) => {
-                            addresses.push({
-                                x: address.total_volume,
-                                y: address.txs_amount,
-                                r: 10
-                            })
-                        })
-                        this.poolSegmentData.datasets.push({
-                            backgroundColor: 'rgb(' + Math.floor(Math.random() * 255) + ',' + Math.floor(Math.random() * 255) + ',' + Math.floor(Math.random() * 255) + ')',
-                            label: index,
-                            data: addresses
-                        })
-                    })
-                    this.loaded = true;
-                    this.chartUpdateKey++;
-                })
-
+                this.loaded = true;
+                this.chartUpdateKey++;
+            } catch (error) {
+                console.error("Ошибка при получении данных:", error);
+            } finally {
+                this.isLoading = false; // завершаем загрузку
+            }
         },
 
         formatNumber(value) {
@@ -380,10 +294,6 @@ export default {
                     return parseFloat(value).toFixed(6);
             }
         },
-
-
-        async getAddressesData(){
-            await axios.post('http://localhost:2000/addresses', { addresses: this.transactions.users })
         updateDoughnutLiquidity() {
             this.doughnutLiquidityData = {
                 labels: this.tableData.map(item => item.chain),
@@ -417,6 +327,7 @@ export default {
                         liquidity: '1800'
                     },
                 ];
+                this.updateDoughnutLiquidity();
             } else if (option === 'option2') {
                 this.tableData = [
                     {
@@ -436,36 +347,36 @@ export default {
                     },
                     {
                         chain: 'Ethereum',
-                        users: '120012312',
+                        users: '1400',
                         liquidity: '2800'
                     },
                 ];
+                this.updateDoughnutLiquidity();
             } else if (option === 'option3') {
                 this.tableData = [
                     {
                         chain: 'BSC',
                         users: '1200',
-                        liquidity: '5500'
+                        liquidity: '22500'
                     },
                     {
                         chain: 'Avalanche',
                         users: '1500',
-                        liquidity: '5600'
+                        liquidity: '1600'
                     },
                     {
                         chain: 'Arbitrum',
                         users: '14200',
-                        liquidity: '10700'
+                        liquidity: '23700'
                     },
                     {
                         chain: 'Ethereum',
                         users: '120012312',
-                        liquidity: '3800'
+                        liquidity: '52800'
                     },
                 ];
+                this.updateDoughnutLiquidity();
             }
-            this.updateDoughnutLiquidity();
-
         }
     }
 }
@@ -572,10 +483,6 @@ export default {
     font-weight: 900;
 }
 
-
-.pool_segments{
-    height: 600px;
-
 @keyframes spin {
     0% {
         transform: rotate(0deg);
@@ -595,6 +502,5 @@ export default {
     animation: spin 1s linear infinite;
     display: inline-block;
     vertical-align: middle;
-
 }
 </style>
