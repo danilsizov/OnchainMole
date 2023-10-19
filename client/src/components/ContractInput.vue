@@ -296,7 +296,7 @@ export default {
                         backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0'] // Здесь вы можете задать свои цвета
                     }]
                 };
-                const res = await axios.get('http://localhost:2000/?contract=' + this.contract + '&network=' + this.selectedNetwork);
+                const res = await axios.get('http://localhost:2000/api/?contract=' + this.contract + '&network=' + this.selectedNetwork);
                 let transactions = res.data.transactions;
                 this.transactions = transactions
                 this.users_amount.all = transactions.users_amount.all
@@ -407,7 +407,7 @@ export default {
 
 
         async getAddressesData() {
-            await axios.post('http://localhost:2000/addresses', { addresses: this.transactions.users });
+            await axios.post('http://localhost:2000/api/addresses', { addresses: this.transactions.users });
         },
         updateDoughnutLiquidity() {
             this.doughnutLiquidityData = {
