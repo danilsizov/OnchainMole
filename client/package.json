@@ -24,10 +24,11 @@
     "@vue/cli-plugin-babel": "~5.0.0",
     "@vue/cli-plugin-eslint": "~5.0.0",
     "@vue/cli-service": "~5.0.0",
+    "dart-sass": "^1.25.0",
     "eslint": "^7.32.0",
     "eslint-plugin-vue": "^8.0.3",
     "sass": "^1.69.3",
-    "sass-loader": "^13.3.2"
+    "sass-loader": "^8.0.2"
   },
   "eslintConfig": {
     "root": true,
