@@ -26,11 +26,13 @@ body,
 html {
   margin: 0;
   min-height: 100%;
-  overflow: auto;
+  width: 100%;
 }
 
 body {
   height: 100vh;
+  padding-top: 70px;
+  width: 100%;
 }
 
 #app {
@@ -39,13 +41,13 @@ body {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  background-color: #1e1e2f;
+  background-color: #1F2336;
   min-height: 100%;
+  padding-top: 15px;
 }
 
 .content {
   margin-left: 270px;
-  margin-top: 22px;
   width: calc(100vw - 285px)
 }
 </style>
